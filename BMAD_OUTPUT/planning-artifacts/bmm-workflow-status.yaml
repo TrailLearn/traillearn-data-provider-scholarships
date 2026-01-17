@@ -26,9 +26,9 @@ workflow_status:
   research: optional
   product-brief: optional
   prd: "BMAD_OUTPUT/planning-artifacts/prd.md"
-  create-ux-design: conditional
+  create-ux-design: "BMAD_OUTPUT/planning-artifacts/ux-design-specification.md"
   create-architecture: required
-  create-epics-and-stories: required
+  create-epics-and-stories: "BMAD_OUTPUT/planning-artifacts/epics.md"
   test-design: optional
   implementation-readiness: required
   sprint-planning: required
