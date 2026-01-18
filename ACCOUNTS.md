@@ -1,0 +1,2 @@
+- supabase account : tayoaubin@gmail.com
+- project id : pzenoypbqzvirjtpenwz
