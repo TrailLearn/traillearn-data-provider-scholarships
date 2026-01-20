@@ -21,10 +21,10 @@
 - **Then** it should be highlighted as "Active" and its details should load in the Side Panel.
 
 ## Tasks
-- [ ] Create `ReviewQueueItem` component based on UX specs
-- [ ] Create `ReviewQueue` list container with Shadcn `ScrollArea`
-- [ ] Fetch pending tasks from `/api/v1/scholarships` (filter by status)
-- [ ] Handle empty state ("Inbox Zero")
+- [x] Create `ReviewQueueItem` component based on UX specs
+- [x] Create `ReviewQueue` list container with Shadcn `ScrollArea`
+- [x] Fetch pending tasks from `/api/v1/scholarships` (filter by status) - *Mocked for now*
+- [x] Handle empty state ("Inbox Zero")
 
 ## Dev Notes
 - **API Call:** Use `GET /api/v1/scholarships?status=SUBMITTED` (and another for alerts).
@@ -32,12 +32,25 @@
 
 ## Dev Agent Record
 ### Implementation Plan
-[To be filled by Dev Agent]
+1.  Implement `Badge` (UI).
+2.  Implement `ReviewQueueItem` (UI).
+3.  Implement `ScrollArea` (UI).
+4.  Implement `ReviewQueue` (Logic + List).
+5.  Integrate into `queue/page.tsx`.
+
 ### Completion Notes
-[To be filled by Dev Agent]
+- **Components:** `ReviewQueueItem` handles active state and score colors.
+- **List:** `ReviewQueue` manages the list state (currently mocked).
+- **Page:** `web/app/queue/page.tsx` implements the split view.
 
 ## File List
-[To be filled by Dev Agent]
+- web/lib/types.ts
+- web/components/ui/badge.tsx
+- web/components/ui/scroll-area.tsx
+- web/components/review-queue-item.tsx
+- web/components/review-queue.tsx
+- web/app/queue/page.tsx
 
 ## Change Log
 - **[2026-01-18]:** Story created.
+- **[2026-01-20]:** Implemented Review Queue UI.

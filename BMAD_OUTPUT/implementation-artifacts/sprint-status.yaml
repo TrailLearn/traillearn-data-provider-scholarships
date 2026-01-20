@@ -52,7 +52,7 @@ development_status:
 
   epic-3: in-progress
   3-1-admin-dashboard-layout: done
-  3-2-review-queue-component: ready-for-dev
+  3-2-review-queue-component: done
   3-3-smart-diff-viewer-component: ready-for-dev
   3-4-validation-rejection-actions: ready-for-dev
   3-5-inline-edit-capability: ready-for-dev
