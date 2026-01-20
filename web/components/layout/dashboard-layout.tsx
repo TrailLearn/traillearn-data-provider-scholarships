@@ -1,3 +1,5 @@
+"use client"
+
 import Link from "next/link";
 import { LayoutDashboard, ListFilter, Settings, Sun, Moon } from "lucide-react";
 import { useTheme } from "next-themes";
