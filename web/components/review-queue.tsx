@@ -5,16 +5,29 @@ import { Scholarship } from "@/lib/types";
 import { ReviewQueueItem } from "./review-queue-item";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
-export function ReviewQueue() {
+interface ReviewQueueProps {
+  activeId: string | null;
+  onSelect: (scholarship: Scholarship) => void;
+  itemsOverride?: Scholarship[];
+}
+
+export function ReviewQueue({ activeId, onSelect, itemsOverride }: ReviewQueueProps) {
   const [items, setItems] = useState<Scholarship[]>([]);
-  const [activeId, setActiveId] = useState<string | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(!itemsOverride);
+
+  // Sync internal items with override if provided
+  useEffect(() => {
+    if (itemsOverride) {
+        setItems(itemsOverride);
+        setLoading(false);
+    }
+  }, [itemsOverride]);
 
   useEffect(() => {
+    if (itemsOverride) return; // Skip if controlled by parent
+    
     // Mock Fetch
     async function fetchQueue() {
-      // In real app: supabase.from('scholarships').select('*').in('status', ['SUBMITTED', 'ALERT'])
-      
       // Mock Data
       const mockData: Scholarship[] = [
         {
@@ -25,19 +38,25 @@ export function ReviewQueue() {
             health_score: 95,
             deadline_at: "2026-06-01",
             last_verified_at: new Date().toISOString(),
-            data: {},
+            data: {
+                eligibility: { gpa_min: 3.8 },
+                amount: 15000
+            },
             created_at: new Date().toISOString(),
             updated_at: new Date().toISOString()
         },
         {
             id: "2",
-            name: "Broken Link Scholarship",
-            source_url: "https://dead-domain.com",
-            status: "SUBMITTED", // Should be ALERT but using SUBMITTED for mock
-            health_score: 20,
-            deadline_at: null,
+            name: "Global Mobility Grant",
+            source_url: "https://campusfrance.org/grant",
+            status: "SUBMITTED",
+            health_score: 45,
+            deadline_at: "2026-03-15",
             last_verified_at: new Date().toISOString(),
-            data: {},
+            data: {
+                eligibility: { destination: "France" },
+                amount: 5000
+            },
             created_at: new Date().toISOString(),
             updated_at: new Date().toISOString()
         }
@@ -74,7 +93,7 @@ export function ReviewQueue() {
                         key={item.id} 
                         scholarship={item} 
                         isActive={activeId === item.id}
-                        onClick={() => setActiveId(item.id)}
+                        onClick={() => onSelect(item)}
                     />
                 ))}
             </div>

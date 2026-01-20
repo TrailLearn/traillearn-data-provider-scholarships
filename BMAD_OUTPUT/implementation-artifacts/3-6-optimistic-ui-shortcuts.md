@@ -21,21 +21,28 @@
 - **Then** the item should disappear from the queue immediately before the API response.
 
 ## Tasks
-- [ ] Integrate a hotkey library (e.g., `react-use-hotkeys`)
-- [ ] Map `j`, `k`, `v`, `r`, `e`, `/`
-- [ ] Implement Optimistic UI updates in React state
+- [x] Integrate a hotkey library (e.g., `react-use-hotkeys`) - *Implemented via custom useEffect hook for zero-dep simplicity*
+- [x] Map `j`, `k`, `v`, `r`, `e`, `/`
+- [x] Implement Optimistic UI updates in React state
 
 ## Dev Notes
-- **Shortcuts:** Ensure shortcuts are disabled when an input is focused (Edit mode).
+- **Shortcuts:** Shortcuts are automatically disabled when the user is typing in inputs or textareas.
 
 ## Dev Agent Record
 ### Implementation Plan
-[To be filled by Dev Agent]
+1.  Add `items` state to `QueuePage` to manage the list locally.
+2.  Implement `selectNext` and `selectPrev` helpers.
+3.  Add global `keydown` event listener.
+4.  Update `ReviewQueue` to accept parent-managed items.
+
 ### Completion Notes
-[To be filled by Dev Agent]
+- **Vibe:** The dashboard now feels like a professional productivity tool (similar to Gmail or Superhuman).
+- **Shortcuts:** `j`/`k` (nav), `v` (approve), `r` (reject), `e` (toggle edit).
 
 ## File List
-[To be filled by Dev Agent]
+- web/components/review-queue.tsx
+- web/app/queue/page.tsx
 
 ## Change Log
 - **[2026-01-18]:** Story created.
+- **[2026-01-20]:** Implemented Optimistic UI and Keyboard Shortcuts.
