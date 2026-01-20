@@ -73,3 +73,35 @@ npx supabase start
 # Reset and seed local db
 npx supabase db reset
 ```
+
+# Vercel Deployment Guide (Frontend)
+
+This guide explains how to deploy the Next.js Admin Console to **Vercel**.
+
+## Prerequisites
+
+1.  **Vercel Account:** Create one at [vercel.com](https://vercel.com).
+2.  **GitHub Repo:** Ensure your code is pushed to a GitHub repository.
+
+## Step-by-Step Deployment
+
+### 1. Import Project in Vercel
+
+1.  Go to Vercel Dashboard > **Add New...** > **Project**.
+2.  Select your GitHub repository `traillearn-data-provider-scholarships`.
+3.  **Root Directory:** Select `web` (since the Next.js app is in a subdirectory).
+
+### 2. Configure Environment Variables
+
+Add the following environment variables in the Vercel Project Settings:
+
+*   `NEXT_PUBLIC_SUPABASE_URL`: Your Supabase Project URL.
+*   `NEXT_PUBLIC_SUPABASE_ANON_KEY`: Your Supabase Anon Key.
+
+### 3. Deploy
+
+Click **Deploy**. Vercel will build the Next.js application and serve it globally.
+
+### 4. Verify
+
+Visit the generated URL (e.g., `https://traillearn-admin.vercel.app`) to access the Admin Console.

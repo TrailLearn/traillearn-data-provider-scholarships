@@ -44,19 +44,19 @@ development_status:
 
   epic-2: in-progress
   2-1-authentication-middleware: done
-  2-2-submission-api-authenticated: in-progress
-  2-3-input-validation-logic: backlog
-  2-4-admin-direct-submission: backlog
-  2-5-immutable-audit-log: backlog
+  2-2-submission-api-authenticated: done
+  2-3-input-validation-logic: done
+  2-4-admin-direct-submission: done
+  2-5-immutable-audit-log: done
   epic-2-retrospective: optional
 
-  epic-3: backlog
-  3-1-admin-dashboard-layout: backlog
-  3-2-review-queue-component: backlog
-  3-3-smart-diff-viewer-component: backlog
-  3-4-validation-rejection-actions: backlog
-  3-5-inline-edit-capability: backlog
-  3-6-optimistic-ui-shortcuts: backlog
+  epic-3: in-progress
+  3-1-admin-dashboard-layout: done
+  3-2-review-queue-component: ready-for-dev
+  3-3-smart-diff-viewer-component: ready-for-dev
+  3-4-validation-rejection-actions: ready-for-dev
+  3-5-inline-edit-capability: ready-for-dev
+  3-6-optimistic-ui-shortcuts: ready-for-dev
   epic-3-retrospective: optional
 
   epic-4: backlog
