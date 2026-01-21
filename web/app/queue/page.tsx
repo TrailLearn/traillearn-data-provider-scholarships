@@ -8,6 +8,7 @@ import { StickyActionBar } from "@/components/sticky-action-bar";
 import { RejectDialog } from "@/components/reject-dialog";
 import { Scholarship } from "@/lib/types";
 import { Badge } from "@/components/ui/badge";
+import { TrustBadge } from "@/components/trust-badge";
 import { ExternalLink, LayoutDashboard } from "lucide-react";
 
 export default function QueuePage() {
@@ -162,9 +163,8 @@ export default function QueuePage() {
                                     {selectedItem.source_url} <ExternalLink className="h-3 w-3" />
                                 </a>
                             </div>
-                            <div className="text-right">
-                                <div className="text-sm font-medium text-muted-foreground mb-1">Health Score</div>
-                                <div className="text-3xl font-bold">{selectedItem.health_score}</div>
+                            <div className="text-right flex flex-col items-end">
+                                <TrustBadge scholarship={selectedItem} />
                             </div>
                         </div>
 

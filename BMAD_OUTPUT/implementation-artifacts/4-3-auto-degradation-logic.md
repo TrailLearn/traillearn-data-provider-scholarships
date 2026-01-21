@@ -1,6 +1,6 @@
 # Story 4.3: Auto-Degradation Logic
 
-**Status:** ready-for-dev
+**Status:** review
 **Epic:** Epic 4: The Watchdog & Automation (Intelligence)
 
 ## User Story
@@ -28,28 +28,37 @@
 
 ## Tasks
 
-- [ ] Implement degradation logic (SQL function or within the Edge Function from 4.2)
-- [ ] Define thresholds for "confirmed error" vs "transient error"
-- [ ] Implement logic to create Review Queue item (ALERT)
-- [ ] Update Health Score calculation to account for recent check failures
-- [ ] Write tests for degradation scenarios
+- [x] Implement degradation logic (SQL function or within the Edge Function from 4.2)
+- [x] Define thresholds for "confirmed error" vs "transient error"
+- [x] Implement logic to create Review Queue item (ALERT)
+- [x] Update Health Score calculation to account for recent check failures
+- [x] Write tests for degradation scenarios
 
 ## Dev Notes
 
 ### Architecture Guidance
-- **Integration:** This logic likely runs at the end of the `check-availability` job.
-- **State Machine:** Be careful not to flap status if a site is flaky. 2 consecutive failures is a good heuristic.
+- **Integration:** Implemented via Database Triggers (`on_url_check_inserted`) to decouple from the worker logic.
+- **State Machine:** Uses a "2 consecutive failures" heuristic to prevent flapping.
+- **Status:** Added `REVIEW_NEEDED` to `scholarship_status` enum.
 
 ## Dev Agent Record
 
 ### Implementation Plan
-- TBD
+1.  Add `REVIEW_NEEDED` to enum.
+2.  Update `calculate_health_score_value` to penalize stability based on `last_check_status`.
+3.  Create `process_url_check_result` trigger to detect consecutive failures and downgrade status.
+4.  Write `tests/db/test_degradation.sql` to verify the logic.
 
 ### Completion Notes
-- TBD
+- **Status Change:** Successfully implemented auto-degradation to `REVIEW_NEEDED`.
+- **Scoring:** 404/410 errors now zero out the stability score component (20 -> 0).
+- **Testing:** SQL tests confirm that a single failure warns (score drop) but only double failure degrades status.
 
 ## File List
-- TBD
+- supabase/migrations/20260121000000_degradation_logic.sql
+- tests/db/test_degradation.sql
 
 ## Change Log
 - **[2026-01-20]:** Story created.
+- **[2026-01-21]:** Implemented auto-degradation logic.
+

@@ -1,6 +1,6 @@
 # Story 4.1: Health Score Algorithm V1
 
-**Status:** ready-for-dev
+**Status:** review
 **Epic:** Epic 4: The Watchdog & Automation (Intelligence)
 
 ## User Story
@@ -31,31 +31,39 @@
 
 ## Tasks
 
-- [ ] Define the scoring algorithm logic in a TypeScript utility or database function
-- [ ] Implement `calculateHealthScore(scholarship)` function
-- [ ] Create a database trigger or Edge Function to update score on record change
-- [ ] Create a scheduled function (CRON) to update scores based on time decay (Freshness)
-- [ ] Write unit tests for the scoring algorithm with various scenarios
+- [x] Define the scoring algorithm logic in a TypeScript utility or database function
+- [x] Implement `calculateHealthScore(scholarship)` function
+- [x] Create a database trigger or Edge Function to update score on record change
+- [x] Create a scheduled function (CRON) to update scores based on time decay (Freshness)
+- [x] Write unit tests for the scoring algorithm with various scenarios
 
 ## Dev Notes
 
 ### Architecture Guidance
-- **Logic Location:** Can be a PL/PGSQL function for performance or a Deno Edge Function for complexity/maintainability. Given the "Freshness" decay, a daily CRON is needed regardless of triggers.
-- **Formula Proposal:**
-  - `Freshness = max(0, 1 - (days_since_verified / 180)) * 40`
-  - `Reliability = (is_gov_edu ? 1.0 : 0.8) * 40` (Placeholder logic)
-  - `Stability = 20` (Default for V1, until we have history)
+- **Logic Location:** Implemented as PL/PGSQL function `calculate_health_score_value` for performance and proximity to data. Trigger `set_health_score` handles realtime updates.
+- **Formula Implemented:**
+  - `Freshness = 40 * (1 - (days / 180))` (Linear decay)
+  - `Reliability = 40` for `.edu`, `.gov`, etc. else `32`
+  - `Stability = 20` (Fixed V1)
 
 ## Dev Agent Record
 
 ### Implementation Plan
-- TBD
+1.  Create SQL migration for `calculate_health_score_value` function.
+2.  Create Trigger for auto-update on INSERT/UPDATE.
+3.  Create helper function `recalc_all_scores` and schedule via `pg_cron`.
+4.  Write comprehensive SQL unit test `tests/db/test_health_score.sql`.
 
 ### Completion Notes
-- TBD
+- **Database Logic:** Implemented purely in Postgres for maximum efficiency and data integrity.
+- **Testing:** `tests/db/test_health_score.sql` validates Freshness decay, Domain bonuses, and Trigger execution.
+- **Scheduling:** `pg_cron` job scheduled for 3 AM daily to update freshness scores.
 
 ## File List
-- TBD
+- supabase/migrations/20260120000000_health_score_logic.sql
+- supabase/migrations/20260120000100_schedule_score_update.sql
+- tests/db/test_health_score.sql
 
 ## Change Log
 - **[2026-01-20]:** Story created.
+- **[2026-01-20]:** Implemented health score algorithm and automation in Database.

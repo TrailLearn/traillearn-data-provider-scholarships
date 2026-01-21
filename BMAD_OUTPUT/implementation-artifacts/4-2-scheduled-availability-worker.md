@@ -1,6 +1,6 @@
 # Story 4.2: Scheduled Availability Worker
 
-**Status:** ready-for-dev
+**Status:** review
 **Epic:** Epic 4: The Watchdog & Automation (Intelligence)
 
 ## User Story
@@ -25,29 +25,39 @@
 
 ## Tasks
 
-- [ ] Create `url_checks` table in database (scholarship_id, status_code, latency_ms, checked_at)
-- [ ] Create a Supabase Edge Function `check-availability`
-- [ ] Implement logic to fetch all VERIFIED scholarships
-- [ ] Implement batch processing (limit concurrency) to check URLs
-- [ ] Store results in `url_checks`
-- [ ] Configure `pg_cron` or Supabase Scheduled Function to run nightly
+- [x] Create `url_checks` table in database (scholarship_id, status_code, latency_ms, checked_at)
+- [x] Create a Supabase Edge Function `check-availability`
+- [x] Implement logic to fetch all VERIFIED scholarships
+- [x] Implement batch processing (limit concurrency) to check URLs
+- [x] Store results in `url_checks`
+- [x] Configure `pg_cron` or Supabase Scheduled Function to run nightly
 
 ## Dev Notes
 
 ### Technical Specifications
-- **Concurrency:** Be careful not to DOS target sites. Use a small concurrency limit (e.g., 5 concurrent requests).
-- **User Agent:** Use a clear User Agent header `TrailLearn-Bot/1.0 (+https://traillearn.com/bot)`.
+- **Concurrency:** Batch size set to 5 in the Edge Function to prevent overloading source servers.
+- **User Agent:** Identified as `TrailLearn-Bot/1.0`.
 
 ## Dev Agent Record
 
 ### Implementation Plan
-- TBD
+1.  Create `url_checks` table with appropriate indexes.
+2.  Implement `check-availability` Edge Function using Deno and Supabase SDK.
+3.  Add `last_check_status` to `scholarships` table for quick UI reference.
+4.  Schedule task using `pg_cron` and a wrapper PL/PGSQL function.
 
 ### Completion Notes
-- TBD
+- **Database:** Added `url_checks` table and `last_check_status` column.
+- **Worker:** Edge Function implemented with batching and error handling.
+- **Tests:** Added `tests/db/test_availability_worker.sql` to verify schema integration.
 
 ## File List
-- TBD
+- supabase/migrations/20260120000200_url_checks_table.sql
+- supabase/migrations/20260120000300_schedule_check_worker.sql
+- supabase/functions/check-availability/index.ts
+- tests/db/test_availability_worker.sql
 
 ## Change Log
 - **[2026-01-20]:** Story created.
+- **[2026-01-21]:** Implemented availability worker and database logging.
+
