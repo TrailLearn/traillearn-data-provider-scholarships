@@ -206,22 +206,3 @@ export default function QueuePage() {
     </DashboardLayout>
   );
 }
-            ) : (
-                <div className="h-full flex flex-col items-center justify-center text-muted-foreground space-y-2">
-                    <div className="bg-muted rounded-full p-4">
-                        <LayoutDashboard className="h-8 w-8 opacity-20" />
-                    </div>
-                    <p>Sélectionnez une bourse pour auditer les changements</p>
-                </div>
-            )}
-        </div>
-
-        <RejectDialog 
-            isOpen={isRejectDialogOpen} 
-            onClose={() => setIsRejectDialogOpen(false)} 
-            onConfirm={handleReject}
-        />
-      </div>
-    </DashboardLayout>
-  );
-}

@@ -1,6 +1,6 @@
 # Story 1.2: Seed Data Injection
 
-**Status:** ready-for-dev
+**Status:** review
 **Epic:** Epic 1: The Data Foundation & Public Access
 
 ## User Story
@@ -42,6 +42,7 @@
 - [x] Define Scholarship 4: "Future Researchers" (PhD, Stipend)
 - [x] Define Scholarship 5: "Creative Arts Fund" (Portfolio required)
 - [x] Create `docs/deployment_guide.md` with explicit commands to push schema and seed to a free Supabase project
+- [x] Implement automated seed data verification test (tests/db/test_seed_data.sql)
 
 ## Dev Notes
 
@@ -66,17 +67,22 @@
 1.  Generate rich SQL insert statements for `supabase/seed.sql`.
 2.  Cover 5 distinct archetypes to validate the flexibility of the JSONB column.
 3.  Write a clear documentation guide (`docs/deployment_guide.md`) for remote deployment.
+4.  Implement verification tests.
 
 ### Completion Notes
 - **Seed Data:** Created `supabase/seed.sql` with 5 diverse records (Merit, Mobility, Diversity, Research, Arts).
 - **JSONB Validation:** Used realistic structures for `eligibility`, `requirements` and `tags` within the SQL insert.
 - **Documentation:** Created `docs/deployment_guide.md` explaining `supabase link`, `db push` and how to execute the seed script remotely.
+- **Testing:** Added `tests/db/test_seed_data.sql` to verify count, status, and JSONB structure of seeded data.
 
 ## File List
 - supabase/seed.sql
 - docs/deployment_guide.md
+- tests/db/test_seed_data.sql
 
 ## Change Log
 - **[2026-01-18]:** Story created.
 - **[2026-01-18]:** Implemented seed data and documentation.
 - **[2026-01-18]:** Updated deployment guide to use `npx supabase` commands.
+- **[2026-01-20]:** Added automated seed verification test.
+

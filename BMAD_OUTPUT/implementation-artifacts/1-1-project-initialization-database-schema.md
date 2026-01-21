@@ -1,6 +1,6 @@
 # Story 1.1: Project Initialization & Database Schema
 
-**Status:** ready-for-dev
+**Status:** review
 **Epic:** Epic 1: The Data Foundation & Public Access
 
 ## User Story
@@ -49,6 +49,7 @@
 - [x] Create RLS policies for Public Read (SELECT)
 - [x] Create RLS policies for Admin Write (INSERT/UPDATE)
 - [x] Write DB test to verify schema and constraints (using pgTAP or logic verification script)
+- [x] Implement automated RLS policy verification script (tests/db/test_rls_policies.sql)
 
 ## Dev Notes
 
@@ -72,6 +73,7 @@
     *   Indexes.
     *   RLS activation and policies.
 3.  Add a verification SQL script in `tests/db`.
+4.  Implement robust RLS policy tests.
 
 ### Completion Notes
 - **Supabase Config:** Created `supabase/config.toml` with default ports.
@@ -79,13 +81,18 @@
     - Columns: `id`, `name`, `source_url`, `status`, `deadline_at`, `health_score`, `data` (JSONB).
     - Enum: `DRAFT`, `SUBMITTED`, `VERIFIED`, `DEPRECATED`, `ARCHIVED`.
     - RLS: Enabled. Policies `Public Read Access` (all) and `Admin Write Access` (role check).
-- **Testing:** Added `tests/db/test_schema.sql` for manual verification in SQL Editor.
+- **Testing:** 
+    - Added `tests/db/test_schema.sql` for basic schema structure check.
+    - Added `tests/db/test_rls_policies.sql` for adversarial RLS testing (Anon Read, Anon Write Fail, Admin Write Success).
 
 ## File List
 - supabase/config.toml
 - supabase/migrations/20260117000000_create_scholarships_table.sql
 - tests/db/test_schema.sql
+- tests/db/test_rls_policies.sql
 
 ## Change Log
 - **[2026-01-17]:** Story created.
 - **[2026-01-18]:** Implemented database schema and configuration.
+- **[2026-01-20]:** Added comprehensive RLS policy tests following code review.
+

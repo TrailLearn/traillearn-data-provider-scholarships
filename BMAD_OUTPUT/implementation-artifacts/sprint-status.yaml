@@ -59,12 +59,12 @@ development_status:
   3-6-optimistic-ui-shortcuts: done
   epic-3-retrospective: optional
 
-  epic-4: backlog
-  4-1-health-score-algorithm-v1: backlog
-  4-2-scheduled-availability-worker: backlog
-  4-3-auto-degradation-logic: backlog
-  4-4-change-detection-alerting: backlog
-  4-5-trust-badge-visualization: backlog
+  epic-4: in-progress
+  4-1-health-score-algorithm-v1: ready-for-dev
+  4-2-scheduled-availability-worker: ready-for-dev
+  4-3-auto-degradation-logic: ready-for-dev
+  4-4-change-detection-alerting: ready-for-dev
+  4-5-trust-badge-visualization: ready-for-dev
   epic-4-retrospective: optional
 
   epic-5: backlog
