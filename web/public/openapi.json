@@ -1,0 +1,79 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "TrailLearn Scholarships API",
+    "version": "1.0.0",
+    "description": "API for managing and retrieving scholarships data."
+  },
+  "servers": [
+    {
+      "url": "http://localhost:54321/functions/v1",
+      "description": "Local Development (Supabase Functions)"
+    }
+  ],
+  "components": {
+    "schemas": {
+      "Scholarship": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string", "format": "uuid" },
+          "name": { "type": "string" },
+          "source_url": { "type": "string", "format": "uri" },
+          "status": { 
+            "type": "string", 
+            "enum": ["DRAFT", "SUBMITTED", "VERIFIED", "DEPRECATED", "ARCHIVED", "REVIEW_NEEDED"] 
+          },
+          "health_score": { "type": "integer" },
+          "deadline_at": { "type": "string", "format": "date-time" },
+          "data": { "type": "object" }
+        }
+      }
+    }
+  },
+  "paths": {
+    "/scholarships-list": {
+      "get": {
+        "summary": "List Verified Scholarships",
+        "parameters": [
+          { "in": "query", "name": "page", "schema": { "type": "integer", "default": 1 } },
+          { "in": "query", "name": "limit", "schema": { "type": "integer", "default": 20 } }
+        ],
+        "responses": {
+          "200": {
+            "description": "A list of scholarships",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": { "$ref": "#/components/schemas/Scholarship" }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/scholarship-submission": {
+      "post": {
+        "summary": "Submit a new scholarship",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": { "type": "string" },
+                  "source_url": { "type": "string" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "Created" }
+        }
+      }
+    }
+  }
+}

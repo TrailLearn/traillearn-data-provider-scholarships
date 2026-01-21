@@ -13,6 +13,20 @@ interface SmartDiffViewerProps {
   onFieldChange?: (key: string, value: any) => void;
 }
 
+// Liste des champs strictement techniques non modifiables
+const READ_ONLY_FIELDS = [
+    "id",
+    "created_at",
+    "updated_at",
+    "last_verified_at",
+    "health_score",
+    "last_check_status",
+    "last_content_hash",
+    "last_content_length",
+    "submitted_by",
+    "status" // Le statut se change via les boutons d'action (Valider/Rejeter)
+];
+
 export function SmartDiffViewer({ 
   oldData, 
   newData, 
@@ -41,42 +55,48 @@ export function SmartDiffViewer({
       </div>
       
       <div className="divide-y border rounded-lg overflow-hidden bg-card">
-        {visibleDiffs.map((diff) => (
-          <div key={diff.key} className="grid grid-cols-12 gap-4 p-4 text-sm items-center hover:bg-muted/30 transition-colors">
-            {/* Key */}
-            <div className="col-span-4 font-medium text-muted-foreground truncate" title={diff.key}>
-              {diff.key}
-            </div>
+        {visibleDiffs.map((diff) => {
+            const isReadOnly = READ_ONLY_FIELDS.includes(diff.key);
+            const isObject = typeof diff.newValue === 'object' && diff.newValue !== null;
+            
+            return (
+              <div key={diff.key} className="grid grid-cols-12 gap-4 p-4 text-sm items-center hover:bg-muted/30 transition-colors">
+                {/* Key */}
+                <div className="col-span-4 font-medium text-muted-foreground truncate" title={diff.key}>
+                  {diff.key}
+                </div>
 
-            {/* Old Value */}
-            <div className="col-span-4">
-              <span className={cn(
-                "px-1.5 py-0.5 rounded truncate block",
-                diff.isChanged ? "bg-rose-100 text-rose-700 line-through dark:bg-rose-900/30 dark:text-rose-400" : "text-muted-foreground"
-              )}>
-                {humanizeValue(diff.oldValue, diff.key)}
-              </span>
-            </div>
+                {/* Old Value */}
+                <div className="col-span-4">
+                  <span className={cn(
+                    "px-1.5 py-0.5 rounded truncate block",
+                    diff.isChanged ? "bg-rose-100 text-rose-700 line-through dark:bg-rose-900/30 dark:text-rose-400" : "text-muted-foreground"
+                  )}>
+                    {humanizeValue(diff.oldValue, diff.key)}
+                  </span>
+                </div>
 
-            {/* New Value */}
-            <div className="col-span-4">
-              {isEditing ? (
-                <Input 
-                  value={newData?.[diff.key] ?? ""} 
-                  onChange={(e) => onFieldChange?.(diff.key, e.target.value)}
-                  className="h-8 py-0 px-2"
-                />
-              ) : (
-                <span className={cn(
-                  "px-1.5 py-0.5 rounded truncate block",
-                  diff.isChanged ? "bg-emerald-100 text-emerald-700 font-medium dark:bg-emerald-900/30 dark:text-emerald-400" : "text-foreground"
-                )}>
-                  {humanizeValue(diff.newValue, diff.key)}
-                </span>
-              )}
-            </div>
-          </div>
-        ))}
+                {/* New Value */}
+                <div className="col-span-4">
+                  {isEditing && !isReadOnly && !isObject ? (
+                    <Input 
+                      value={newData?.[diff.key] ?? ""} 
+                      onChange={(e) => onFieldChange?.(diff.key, e.target.value)}
+                      className="h-8 py-0 px-2"
+                    />
+                  ) : (
+                    <span className={cn(
+                      "px-1.5 py-0.5 rounded truncate block",
+                      diff.isChanged ? "bg-emerald-100 text-emerald-700 font-medium dark:bg-emerald-900/30 dark:text-emerald-400" : "text-foreground",
+                      isEditing && isReadOnly && "opacity-50 cursor-not-allowed"
+                    )} title={isEditing && isReadOnly ? "Ce champ n'est pas éditable" : ""}>
+                      {humanizeValue(diff.newValue, diff.key)}
+                    </span>
+                  )}
+                </div>
+              </div>
+            );
+        })}
       </div>
     </div>
   );
