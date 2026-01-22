@@ -2,11 +2,25 @@ import { corsHeaders } from '../_shared/auth.ts'
 
 // Reference Data for V1
 const COUNTRIES = [
-// ... same ...
+    "France",
+    "USA",
+    "United Kingdom",
+    "Canada",
+    "Germany",
+    "Australia",
+    "Japan",
+    "China",
+    "Global"
 ];
 
 const LEVELS = [
-// ... same ...
+    "High School",
+    "Bachelor",
+    "Master",
+    "PhD",
+    "Post-Doc",
+    "Bootcamp",
+    "Vocational Training"
 ];
 
 Deno.serve(async (req) => {
@@ -30,3 +44,15 @@ Deno.serve(async (req) => {
       },
       status: 200,
     })
+
+  } catch (err) {
+    console.error('Unexpected Error:', err)
+    return new Response(
+      JSON.stringify({ error: "Internal Server Error", message: err.message }), 
+      {
+        status: 500,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      }
+    );
+  }
+})

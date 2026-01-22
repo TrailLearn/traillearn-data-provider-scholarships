@@ -11,7 +11,7 @@ const errorResponse = (status: number, title: string, detail: string) => {
     }),
     {
       status,
-      headers: { ...corsHeaders, 'Content-Type': 'application/problem+json' },
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     }
   )
 }

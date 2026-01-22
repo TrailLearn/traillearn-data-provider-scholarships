@@ -34,8 +34,8 @@ story_location: {project-root}/BMAD_OUTPUT/implementation-artifacts
 
 development_status:
   epic-1: in-progress
-  1-1-project-initialization-database-schema: review
-  1-2-seed-data-injection: review
+  1-1-project-initialization-database-schema: done
+  1-2-seed-data-injection: done
   1-3-public-api-list-scholarships: done
   1-4-public-api-advanced-filters: done
   1-5-public-api-get-scholarship-detail: done

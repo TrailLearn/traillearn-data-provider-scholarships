@@ -16,7 +16,7 @@ const errorResponse = (status: number, title: string, detail: string) => {
     }),
     {
       status,
-      headers: { ...corsHeaders, 'Content-Type': 'application/problem+json' },
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     }
   )
 }
@@ -101,6 +101,12 @@ Deno.serve(async (req) => {
 
   } catch (err) {
     console.error('Unexpected Error:', err)
-    return errorResponse(500, 'Internal Server Error', 'An unexpected error occurred')
+    return new Response(
+      JSON.stringify({ error: 'Internal Server Error', message: err.message }),
+      {
+        status: 500,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      }
+    )
   }
 })
