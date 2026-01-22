@@ -1,5 +1,5 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.7.1'
-import { validateUser } from '../_shared/auth.ts'
+import { validateUser, corsHeaders } from '../_shared/auth.ts'
 import { validateSubmission } from './validation.ts'
 
 const errorResponse = (status: number, title: string, detail: string) => {
@@ -12,12 +12,17 @@ const errorResponse = (status: number, title: string, detail: string) => {
     }),
     {
       status,
-      headers: { 'Content-Type': 'application/problem+json' },
+      headers: { ...corsHeaders, 'Content-Type': 'application/problem+json' },
     }
   )
 }
 
 Deno.serve(async (req) => {
+  // Handle CORS preflight
+  if (req.method === 'OPTIONS') {
+    return new Response('ok', { headers: corsHeaders })
+  }
+
   // Only allow POST
   if (req.method !== 'POST') {
     return errorResponse(405, 'Method Not Allowed', 'Only POST is supported')
@@ -91,7 +96,7 @@ Deno.serve(async (req) => {
     // 5. Success Response
     return new Response(JSON.stringify(data), {
         status: 201,
-        headers: { 'Content-Type': 'application/json' }
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
     })
 
   } catch (err) {

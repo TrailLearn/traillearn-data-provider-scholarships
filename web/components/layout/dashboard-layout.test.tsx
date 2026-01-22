@@ -14,9 +14,10 @@ describe("DashboardLayout", () => {
       </DashboardLayout>
     );
 
-    expect(screen.getByText("TrailLearn Admin")).toBeInTheDocument();
+    expect(screen.getByText("TrailLearn")).toBeInTheDocument();
     expect(screen.getByText("Review Queue")).toBeInTheDocument();
-    expect(screen.getByText("API Explorer")).toBeInTheDocument();
+    expect(screen.getByText("API Docs")).toBeInTheDocument();
+    expect(screen.getByText("Developer")).toBeInTheDocument();
   });
 
   it("renders children content", () => {

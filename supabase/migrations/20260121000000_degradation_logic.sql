@@ -57,27 +57,24 @@ CREATE TRIGGER set_health_score
 CREATE OR REPLACE FUNCTION process_url_check_result()
 RETURNS TRIGGER AS $$
 DECLARE
-    prev_failure_count INTEGER;
+    last_status_code INTEGER;
 BEGIN
-    -- Only inspect failures
+    -- Only inspect failures (current check is a failure)
     IF NEW.status_code BETWEEN 200 AND 299 THEN
         RETURN NEW;
     END IF;
 
-    -- Count consecutive recent failures for this scholarship
-    -- We look for ANY successful check after the last failure to reset? 
-    -- Simplification: Just check if the very last check (before this one) was a failure.
-    SELECT count(*) INTO prev_failure_count
+    -- Get the status code of the most recent check before this one
+    SELECT status_code INTO last_status_code
     FROM url_checks
     WHERE scholarship_id = NEW.scholarship_id
       AND checked_at < NEW.checked_at
-      AND (status_code < 200 OR status_code >= 300)
-      AND checked_at > (now() - INTERVAL '48 hours') -- Only look at recent history
     ORDER BY checked_at DESC
     LIMIT 1;
 
-    -- If we have at least 1 previous failure (so 2 consecutive including this one)
-    IF prev_failure_count >= 1 THEN
+    -- If the last check was ALSO a failure (not NULL and not 2xx)
+    -- This confirms 2 consecutive failures.
+    IF last_status_code IS NOT NULL AND (last_status_code < 200 OR last_status_code >= 300) THEN
         UPDATE scholarships 
         SET status = 'REVIEW_NEEDED'
         WHERE id = NEW.scholarship_id 

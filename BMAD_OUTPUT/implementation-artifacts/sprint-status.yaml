@@ -67,9 +67,9 @@ development_status:
   4-5-trust-badge-visualization: done
   epic-4-retrospective: optional
 
-  epic-5: backlog
-  5-1-openapi-specification-auto-generation: backlog
-  5-2-try-it-out-console: backlog
-  5-3-token-management-ui: backlog
-  5-4-code-snippet-generator: backlog
+  epic-5: in-progress
+  5-1-openapi-specification-auto-generation: review
+  5-2-try-it-out-console: review
+  5-3-token-management-ui: review
+  5-4-code-snippet-generator: review
   epic-5-retrospective: optional

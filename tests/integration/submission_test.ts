@@ -18,6 +18,15 @@ Deno.test("Submission API - Integration Check", async (t) => {
         assertEquals(res.status, 401);
     });
 
-    // Note: To test success, we would need a valid JWT from a local user.
-    // This is typically done by signing up a test user in the setup phase.
+    await t.step("POST with invalid token returns 401", async () => {
+        const res = await fetch(API_URL, {
+            method: 'POST',
+            headers: { 'Authorization': 'Bearer invalid-token' },
+            body: JSON.stringify({ name: 'Test' })
+        });
+        assertEquals(res.status, 401);
+    });
+
+    // Note: Success tests (201) and Validation errors (400) require authentication
+    // which is usually handled in CI by creating a service-role session.
 });

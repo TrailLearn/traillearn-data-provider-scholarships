@@ -3,15 +3,27 @@
   "info": {
     "title": "TrailLearn Scholarships API",
     "version": "1.0.0",
-    "description": "API for managing and retrieving scholarships data."
+    "description": "API for managing and consuming verified scholarship data. Designed for educational platforms and data managers."
   },
   "servers": [
     {
       "url": "http://localhost:54321/functions/v1",
-      "description": "Local Development (Supabase Functions)"
+      "description": "Local Supabase Edge Runtime"
+    },
+    {
+      "url": "https://pzenoypbqzvirjtpenwz.supabase.co/functions/v1",
+      "description": "Production API"
     }
   ],
   "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "description": "Supabase JWT (Anon or Service Role key)"
+      }
+    },
     "schemas": {
       "Scholarship": {
         "type": "object",
@@ -23,9 +35,20 @@
             "type": "string", 
             "enum": ["DRAFT", "SUBMITTED", "VERIFIED", "DEPRECATED", "ARCHIVED", "REVIEW_NEEDED"] 
           },
-          "health_score": { "type": "integer" },
-          "deadline_at": { "type": "string", "format": "date-time" },
-          "data": { "type": "object" }
+          "health_score": { "type": "integer", "minimum": 0, "maximum": 100 },
+          "deadline_at": { "type": "string", "format": "date-time", "nullable": true },
+          "last_verified_at": { "type": "string", "format": "date-time" },
+          "data": { 
+            "type": "object",
+            "description": "Flexible JSON storage for eligibility, requirements, etc."
+          }
+        }
+      },
+      "Error": {
+        "type": "object",
+        "properties": {
+          "error": { "type": "string" },
+          "message": { "type": "string" }
         }
       }
     }
@@ -34,6 +57,7 @@
     "/scholarships-list": {
       "get": {
         "summary": "List Verified Scholarships",
+        "description": "Returns a list of scholarships that are ready for public consumption.",
         "parameters": [
           { "in": "query", "name": "page", "schema": { "type": "integer", "default": 1 } },
           { "in": "query", "name": "limit", "schema": { "type": "integer", "default": 20 } }
@@ -53,25 +77,98 @@
         }
       }
     },
+    "/scholarship-detail": {
+      "get": {
+        "summary": "Get Scholarship Details",
+        "description": "Retrieves full information for a single scholarship including trust metadata.",
+        "parameters": [
+          { 
+            "in": "query", 
+            "name": "id", 
+            "required": true, 
+            "schema": { "type": "string", "format": "uuid" },
+            "description": "The unique identifier of the scholarship"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Scholarship details",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Scholarship" }
+              }
+            }
+          },
+          "404": {
+            "description": "Scholarship not found",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Error" }
+              }
+            }
+          }
+        }
+      }
+    },
     "/scholarship-submission": {
       "post": {
-        "summary": "Submit a new scholarship",
+        "summary": "Submit a new opportunity",
+        "description": "Allows authenticated users to submit a new scholarship for review.",
+        "security": [{ "bearerAuth": [] }],
         "requestBody": {
           "required": true,
           "content": {
             "application/json": {
               "schema": {
                 "type": "object",
+                "required": ["name", "source_url"],
                 "properties": {
-                  "name": { "type": "string" },
-                  "source_url": { "type": "string" }
+                  "name": { "type": "string", "example": "Merit Excellence 2026" },
+                  "source_url": { "type": "string", "format": "uri", "example": "https://example.com/apply" },
+                  "data": { "type": "object" }
                 }
               }
             }
           }
         },
         "responses": {
-          "201": { "description": "Created" }
+          "201": {
+            "description": "Successfully submitted",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": { "type": "string", "format": "uuid" },
+                    "status": { "type": "string", "example": "SUBMITTED" }
+                  }
+                }
+              }
+            }
+          },
+          "401": { "description": "Unauthorized" }
+        }
+      }
+    },
+    "/metadata": {
+      "get": {
+        "summary": "Get API Metadata",
+        "description": "Returns taxonomies and reference data (countries, levels) used by the API.",
+        "responses": {
+          "200": {
+            "description": "Reference data",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "countries": { "type": "array", "items": { "type": "string" } },
+                    "levels": { "type": "array", "items": { "type": "string" } }
+                  }
+                }
+              }
+            }
+          }
         }
       }
     }

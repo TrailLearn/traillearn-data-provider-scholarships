@@ -3,6 +3,7 @@
 // This enables autocomplete, go to definition, etc.
 
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.7.1'
+import { corsHeaders } from '../_shared/auth.ts'
 
 // RFC 7807 Error Helper
 const errorResponse = (status: number, title: string, detail: string) => {
@@ -15,12 +16,17 @@ const errorResponse = (status: number, title: string, detail: string) => {
     }),
     {
       status,
-      headers: { 'Content-Type': 'application/problem+json' },
+      headers: { ...corsHeaders, 'Content-Type': 'application/problem+json' },
     }
   )
 }
 
 Deno.serve(async (req) => {
+  // Handle CORS preflight
+  if (req.method === 'OPTIONS') {
+    return new Response('ok', { headers: corsHeaders })
+  }
+
   try {
     // 1. Init Client
     const supabaseUrl = Deno.env.get('SUPABASE_URL') ?? ''
@@ -83,7 +89,7 @@ Deno.serve(async (req) => {
     }
 
     // 5. Construct Response with Pagination Metadata
-    const headers = new Headers()
+    const headers = new Headers(corsHeaders)
     headers.set('Content-Type', 'application/json')
     headers.set('Content-Range', `${offset}-${offset + (data?.length ?? 0) - 1}/${count}`)
     headers.set('X-Total-Count', count?.toString() ?? '0')
