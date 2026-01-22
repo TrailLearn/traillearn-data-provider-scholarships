@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import openapiBase from '@/../public/openapi.json';
+import openapiBase from '@/public/openapi.json';
 
 export async function GET() {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
