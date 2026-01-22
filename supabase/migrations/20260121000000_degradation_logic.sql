@@ -5,7 +5,7 @@
 ALTER TYPE scholarship_status ADD VALUE IF NOT EXISTS 'REVIEW_NEEDED';
 
 -- 2. Update Health Score Calculation to include Stability (Check Status)
-CREATE OR REPLACE FUNCTION calculate_health_score_value(row scholarships)
+CREATE OR REPLACE FUNCTION calculate_health_score_value(s scholarships)
 RETURNS INTEGER AS $$
 DECLARE
     score_freshness INTEGER;
@@ -15,10 +15,10 @@ DECLARE
     domain TEXT;
 BEGIN
     -- 1. Freshness (Max 40)
-    IF row.last_verified_at IS NULL THEN
+    IF s.last_verified_at IS NULL THEN
         score_freshness := 0;
     ELSE
-        days_since_verified := EXTRACT(DAY FROM (now() - row.last_verified_at));
+        days_since_verified := EXTRACT(DAY FROM (now() - s.last_verified_at));
         IF days_since_verified < 0 THEN score_freshness := 40;
         ELSIF days_since_verified >= 180 THEN score_freshness := 0;
         ELSE score_freshness := FLOOR(40 * (1.0 - (days_since_verified::numeric / 180.0)));
@@ -26,16 +26,16 @@ BEGIN
     END IF;
 
     -- 2. Reliability (Max 40)
-    domain := substring(row.source_url from 'https?://([^/]+)');
+    domain := substring(s.source_url from 'https?://([^/]+)');
     IF domain IS NULL THEN score_reliability := 0;
     ELSIF domain ~* '\.(edu|gov|mil|ac\.[a-z]{2}|gouv\.[a-z]{2})(\.|$)' THEN score_reliability := 40;
     ELSE score_reliability := 32;
     END IF;
 
     -- 3. Stability (Max 20) - NEW LOGIC
-    IF row.last_check_status IS NULL OR (row.last_check_status >= 200 AND row.last_check_status < 300) THEN
+    IF s.last_check_status IS NULL OR (s.last_check_status >= 200 AND s.last_check_status < 300) THEN
         score_stability := 20;
-    ELSIF row.last_check_status = 404 OR row.last_check_status = 410 THEN
+    ELSIF s.last_check_status = 404 OR s.last_check_status = 410 THEN
         score_stability := 0; -- Dead link
     ELSE
         score_stability := 10; -- Transient or other error

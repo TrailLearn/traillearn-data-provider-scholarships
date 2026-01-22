@@ -1,6 +1,6 @@
 -- Function to calculate health score based on scholarship row data
 -- Returns an integer between 0 and 100
-CREATE OR REPLACE FUNCTION calculate_health_score_value(row scholarships)
+CREATE OR REPLACE FUNCTION calculate_health_score_value(s scholarships)
 RETURNS INTEGER AS $$
 DECLARE
     score_freshness INTEGER;
@@ -11,10 +11,10 @@ DECLARE
 BEGIN
     -- 1. Freshness (Max 40 points)
     -- Logic: 100% at 0 days, decaying linearly to 0% at 180 days.
-    IF row.last_verified_at IS NULL THEN
+    IF s.last_verified_at IS NULL THEN
         score_freshness := 0;
     ELSE
-        days_since_verified := EXTRACT(DAY FROM (now() - row.last_verified_at));
+        days_since_verified := EXTRACT(DAY FROM (now() - s.last_verified_at));
         
         IF days_since_verified < 0 THEN
              -- Future date? Treat as fresh (or 0 if strict, but let's say fresh)
@@ -29,7 +29,7 @@ BEGIN
 
     -- 2. Reliability (Max 40 points)
     -- Logic: Bonus for trusted domains (.edu, .gov, .ac.*, .gouv.*)
-    domain := substring(row.source_url from 'https?://([^/]+)');
+    domain := substring(s.source_url from 'https?://([^/]+)');
     
     IF domain IS NULL THEN
         score_reliability := 0; -- Invalid URL

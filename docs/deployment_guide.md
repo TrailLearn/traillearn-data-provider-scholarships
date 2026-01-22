@@ -1,107 +1,131 @@
-# Supabase Deployment Guide
+# Traillearn Scholarships - Deployment Guide
 
-This guide explains how to deploy the database schema and seed data to a **free Supabase project**.
+This guide explains how to deploy the full stack: Database (Supabase), Edge Functions (Workers), and Frontend (Next.js Admin Console).
 
-## Prerequisites
+## 📚 Prerequisites
 
-1.  **Supabase Account:** Create one at [supabase.com](https://supabase.com).
-2.  **Supabase CLI:** Installed on your machine.
-    *   Mac: `brew install supabase/tap/supabase`
-    *   Windows: `scoop bucket add supabase https://github.com/supabase/scoop-bucket.git && scoop install supabase`
-    *   NPM: `npm install -g supabase`
+1.  **Supabase Account:** [supabase.com](https://supabase.com) (Pro plan recommended for `pg_cron` in production, though Free tier supports Edge Functions).
+2.  **Vercel Account:** [vercel.com](https://vercel.com) (for Frontend).
+3.  **Supabase CLI:** `npm install -g supabase`
 
-## Step-by-Step Deployment
+---
 
-### 1. Login to Supabase CLI
+## 🗄️ Backend Deployment (Supabase)
 
-```bash
-npx supabase login
-```
-Follow the browser instructions to authenticate.
+### 1. Project Setup & Linking
 
-### 2. Link your Local Project to Remote Project
+1.  Create a new project on Supabase.
+2.  **Important:** In the dashboard, go to **Database > Extensions** and enable:
+    *   `pg_cron` (for scheduled tasks)
+    *   `pg_net` (for HTTP requests from DB triggers)
+    *   *Note: On the Free Tier, you might be limited regarding custom extensions. Check support status.*
+3.  Link your local environment:
+    ```bash
+    npx supabase login
+    npx supabase link --project-ref <YOUR_PROJECT_ID>
+    ```
 
-1.  Go to your Supabase Dashboard and create a new project.
-2.  Get the `Reference ID` (it's in the project URL: `https://supabase.com/dashboard/project/<REFERENCE_ID>`).
-3.  Run the link command:
+### 2. Database Schema (Epic 1 & 4)
 
-```bash
-npx supabase link --project-ref <REFERENCE_ID>
-```
-You will be asked for your database password (created during project setup).
-
-### 3. Push Database Schema (Migrations)
-
-Apply the table structure, enums, and RLS policies:
+Push the migrations to create tables (`scholarships`, `url_checks`), enums, functions, and triggers:
 
 ```bash
 npx supabase db push
 ```
 
-### 4. Seed the Data (Insert Test Scholarships)
+*This includes:*
+*   Health Score logic (PL/PGSQL)
+*   Auto-degradation triggers
+*   Audit logs tables
 
-The `db push` command does *not* automatically run the seed file on remote projects (it's for local dev primarily). You have two options:
+### 3. Edge Functions (Epic 4 - The Watchdog)
 
-**Option A: Manual SQL Execution (Easiest)**
-1.  Open the file `supabase/seed.sql` in your editor.
-2.  Copy the entire content.
-3.  Go to Supabase Dashboard > SQL Editor.
-4.  Paste and run.
+Deploy the availability checking worker:
 
-**Option B: CLI Reset (Warning: Destructive)**
-If you want to fully reset the remote DB and seed it (WARNING: Deletes all existing data):
+1.  **Set Secrets:** The function uses the built-in `SUPABASE_URL` but needs your Service Role Key (renamed to avoid reserved prefix) to bypass RLS.
+    ```bash
+    npx supabase secrets set PRIVATE_SERVICE_ROLE_KEY=<your-service-role-key>
+    ```
+    *Find this in Dashboard > Project Settings > API.*
+
+2.  **Deploy Function:**
+    ```bash
+    npx supabase functions deploy check-availability
+    ```
+
+### 4. Configure Cron Job (Epic 4)
+
+The migration `20260120000300_schedule_check_worker.sql` attempts to schedule the job. However, the URL for the function needs to be correct for the production environment.
+
+1.  Go to **Supabase Dashboard > SQL Editor**.
+2.  Run the following SQL to verify or update the schedule with the **real** Edge Function URL:
+    ```sql
+    -- Replace with your actual deployed function URL
+    -- (Find it in Dashboard > Edge Functions > check-availability > Details)
+    SELECT cron.schedule(
+      'nightly-availability-check',
+      '0 2 * * *', -- Runs at 2:00 AM UTC
+      $$
+      PERFORM net.http_post(
+          url := 'https://<PROJECT_REF>.supabase.co/functions/v1/check-availability',
+          headers := '{"Content-Type": "application/json", "Authorization": "Bearer <SERVICE_ROLE_KEY>"}'::jsonb,
+          body := '{}'::jsonb
+      );
+      $$
+    );
+    ```
+    *Note: Storing the Service Key in the cron job definition is common for internal tasks, but ensure your database access is secure.*
+
+### 5. Seed Data (Optional)
+
+To populate the DB with initial data:
 
 ```bash
+# WARNING: This resets the remote DB!
+# Use manual SQL copy-paste from supabase/seed.sql into SQL Editor for non-destructive insert.
 npx supabase db reset --linked
 ```
 
-### 5. Verification
+---
 
-Go to the **Table Editor** in your Supabase Dashboard. You should see:
-*   Table `scholarships`
-*   5 Rows of verified data
-*   Columns `data` populated with JSON content.
+## 🖥️ Frontend Deployment (Epic 3)
 
-## Local Development (Optional)
+The frontend contains the Admin Console, Review Queue, and Smart Diff Viewer.
 
-To test locally before pushing:
+### 1. Vercel Deployment
 
-```bash
-# Start local docker containers
-npx supabase start
+1.  Import the repo into Vercel.
+2.  Set **Root Directory** to `web`.
+3.  Add **Environment Variables**:
+    *   `NEXT_PUBLIC_SUPABASE_URL`: Your Supabase Project URL.
+    *   `NEXT_PUBLIC_SUPABASE_ANON_KEY`: Your Supabase Anon Key.
 
-# Reset and seed local db
-npx supabase db reset
-```
+### 2. Verify Features
 
-# Vercel Deployment Guide (Frontend)
+*   **Review Queue:** Visit `/queue` to see the Admin Dashboard.
+*   **API Docs:** Visit `/docs` to see the Swagger UI (Epic 5 preview).
+*   **Inline Edit:** Click "Edit" on an item in the queue. Technical fields (ID, Dates) should be read-only.
+*   **Trust Badge:** Verified scholarships should show a colored Trust Badge.
 
-This guide explains how to deploy the Next.js Admin Console to **Vercel**.
+---
 
-## Prerequisites
+## 🛠️ Verification & Troubleshooting
 
-1.  **Vercel Account:** Create one at [vercel.com](https://vercel.com).
-2.  **GitHub Repo:** Ensure your code is pushed to a GitHub repository.
+### How to test the Watchdog (Epic 4)?
 
-## Step-by-Step Deployment
+1.  **Trigger Manually:** You can invoke the function from the CLI or Dashboard.
+    ```bash
+    curl -i --location --request POST 'https://<PROJECT_REF>.supabase.co/functions/v1/check-availability' \
+    --header 'Authorization: Bearer <ANON_KEY>'
+    ```
+    *(Ensure you allowed Anon access or use Service Key if function enforces it)*
 
-### 1. Import Project in Vercel
+2.  **Check Logs:**
+    *   **Edge Function Logs:** Dashboard > Edge Functions > check-availability > Logs.
+    *   **Database Logs:** Check the `url_checks` table:
+        ```sql
+        SELECT * FROM url_checks ORDER BY checked_at DESC LIMIT 10;
+        ```
 
-1.  Go to Vercel Dashboard > **Add New...** > **Project**.
-2.  Select your GitHub repository `traillearn-data-provider-scholarships`.
-3.  **Root Directory:** Select `web` (since the Next.js app is in a subdirectory).
-
-### 2. Configure Environment Variables
-
-Add the following environment variables in the Vercel Project Settings:
-
-*   `NEXT_PUBLIC_SUPABASE_URL`: Your Supabase Project URL.
-*   `NEXT_PUBLIC_SUPABASE_ANON_KEY`: Your Supabase Anon Key.
-
-### 3. Deploy
-
-Click **Deploy**. Vercel will build the Next.js application and serve it globally.
-
-### 4. Verify
-
-Visit the generated URL (e.g., `https://traillearn-admin.vercel.app`) to access the Admin Console.
+3.  **Verify Degradation:**
+    *   If a URL returns 404 twice in a row, the scholarship status in `scholarships` table should change to `REVIEW_NEEDED` and `health_score` should drop.
