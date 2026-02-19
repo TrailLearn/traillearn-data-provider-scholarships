@@ -2,3 +2,6 @@
 .gemini/*
 web/node_modules/
 node_modules/
+.next/
+dist/
+.env
