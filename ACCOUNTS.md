@@ -1,0 +1,3 @@
+- supabase account : tayoaubin@gmail.com
+- project id : pzenoypbqzvirjtpenwz
+- vercel account : aubintayo@gmail.com
