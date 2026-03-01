@@ -7,7 +7,7 @@ interface AuthContextType {
     session: Session | null
     isLoading: boolean
     isAdmin: boolean
-    signUp: (email: string, password: string) => Promise<{ error: Error | null }>
+    signUp: (email: string, password: string, options?: { emailRedirectTo?: string }) => Promise<{ error: Error | null; session: Session | null }>
     signIn: (email: string, password: string) => Promise<{ error: Error | null }>
     signOut: () => Promise<void>
 }
@@ -41,9 +41,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return () => subscription.unsubscribe()
     }, [])
 
-    const signUp = async (email: string, password: string) => {
-        const { error } = await supabase.auth.signUp({ email, password })
-        return { error: error as Error | null }
+    const signUp = async (email: string, password: string, options?: { emailRedirectTo?: string }) => {
+        const { data, error } = await supabase.auth.signUp({
+            email,
+            password,
+            options: options?.emailRedirectTo ? { emailRedirectTo: options.emailRedirectTo } : undefined,
+        })
+        return { error: error as Error | null, session: data?.session ?? null }
     }
 
     const signIn = async (email: string, password: string) => {

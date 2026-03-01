@@ -1,15 +1,18 @@
 import { useState, type FormEvent } from 'react'
 import { useAuth } from './auth-provider'
-import { useNavigate, Link } from 'react-router-dom'
+import { useNavigate, useSearchParams, Link } from 'react-router-dom'
 import { LogIn, UserPlus, Loader2, AlertCircle } from 'lucide-react'
 
 export function LoginPage() {
     const { signIn } = useAuth()
     const navigate = useNavigate()
+    const [searchParams] = useSearchParams()
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
     const [error, setError] = useState<string | null>(null)
     const [loading, setLoading] = useState(false)
+
+    const redirectTo = searchParams.get('redirect') || '/bourses'
 
     const handleSubmit = async (e: FormEvent) => {
         e.preventDefault()
@@ -20,7 +23,7 @@ export function LoginPage() {
             setError(error.message)
             setLoading(false)
         } else {
-            navigate('/')
+            navigate(redirectTo)
         }
     }
 
@@ -56,6 +59,7 @@ export function LoginPage() {
                                 id="login-email"
                                 type="email"
                                 required
+                                autoComplete="email"
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
                                 className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring transition-shadow"
@@ -71,6 +75,7 @@ export function LoginPage() {
                                 id="login-password"
                                 type="password"
                                 required
+                                autoComplete="current-password"
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
                                 className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring transition-shadow"
@@ -108,7 +113,7 @@ export function SignupPage() {
     const [confirmPassword, setConfirmPassword] = useState('')
     const [error, setError] = useState<string | null>(null)
     const [loading, setLoading] = useState(false)
-    const [success, setSuccess] = useState(false)
+    const [awaitingConfirmation, setAwaitingConfirmation] = useState(false)
 
     const handleSubmit = async (e: FormEvent) => {
         e.preventDefault()
@@ -124,17 +129,24 @@ export function SignupPage() {
         }
 
         setLoading(true)
-        const { error } = await signUp(email, password)
+        const { error, session } = await signUp(email, password, {
+            emailRedirectTo: window.location.origin,
+        })
+
         if (error) {
             setError(error.message)
             setLoading(false)
+        } else if (session) {
+            // Email confirmation disabled — user is immediately logged in
+            navigate('/bourses')
         } else {
-            setSuccess(true)
+            // Email confirmation required
+            setAwaitingConfirmation(true)
             setLoading(false)
         }
     }
 
-    if (success) {
+    if (awaitingConfirmation) {
         return (
             <div className="min-h-screen flex items-center justify-center bg-background px-4">
                 <div className="w-full max-w-md text-center">
@@ -189,6 +201,7 @@ export function SignupPage() {
                                 id="signup-email"
                                 type="email"
                                 required
+                                autoComplete="email"
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
                                 className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring transition-shadow"
@@ -204,6 +217,7 @@ export function SignupPage() {
                                 id="signup-password"
                                 type="password"
                                 required
+                                autoComplete="new-password"
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
                                 className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring transition-shadow"
@@ -219,6 +233,7 @@ export function SignupPage() {
                                 id="signup-confirm"
                                 type="password"
                                 required
+                                autoComplete="new-password"
                                 value={confirmPassword}
                                 onChange={(e) => setConfirmPassword(e.target.value)}
                                 className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring transition-shadow"
