@@ -1,7 +1,46 @@
 import { useState, type FormEvent } from 'react'
 import { useAuth } from './auth-provider'
 import { useNavigate, useSearchParams, Link } from 'react-router-dom'
-import { LogIn, UserPlus, Loader2, AlertCircle } from 'lucide-react'
+import { LogIn, UserPlus, Loader2, AlertCircle, Eye, EyeOff } from 'lucide-react'
+
+function PasswordInput({
+    id,
+    value,
+    onChange,
+    placeholder,
+    autoComplete,
+}: {
+    id: string
+    value: string
+    onChange: (v: string) => void
+    placeholder?: string
+    autoComplete?: string
+}) {
+    const [visible, setVisible] = useState(false)
+    return (
+        <div className="relative">
+            <input
+                id={id}
+                type={visible ? 'text' : 'password'}
+                required
+                autoComplete={autoComplete}
+                value={value}
+                onChange={(e) => onChange(e.target.value)}
+                className="w-full rounded-lg border border-input bg-background px-3 py-2 pr-10 text-sm outline-none focus:ring-2 focus:ring-ring transition-shadow"
+                placeholder={placeholder}
+            />
+            <button
+                type="button"
+                onClick={() => setVisible((v) => !v)}
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                tabIndex={-1}
+                aria-label={visible ? 'Masquer le mot de passe' : 'Afficher le mot de passe'}
+            >
+                {visible ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+            </button>
+        </div>
+    )
+}
 
 export function LoginPage() {
     const { signIn } = useAuth()
@@ -71,14 +110,11 @@ export function LoginPage() {
                             <label htmlFor="login-password" className="block text-sm font-medium mb-1.5">
                                 Mot de passe
                             </label>
-                            <input
+                            <PasswordInput
                                 id="login-password"
-                                type="password"
-                                required
-                                autoComplete="current-password"
                                 value={password}
-                                onChange={(e) => setPassword(e.target.value)}
-                                className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring transition-shadow"
+                                onChange={setPassword}
+                                autoComplete="current-password"
                                 placeholder="••••••••"
                             />
                         </div>
@@ -137,10 +173,8 @@ export function SignupPage() {
             setError(error.message)
             setLoading(false)
         } else if (session) {
-            // Email confirmation disabled — user is immediately logged in
             navigate('/bourses')
         } else {
-            // Email confirmation required
             setAwaitingConfirmation(true)
             setLoading(false)
         }
@@ -213,14 +247,11 @@ export function SignupPage() {
                             <label htmlFor="signup-password" className="block text-sm font-medium mb-1.5">
                                 Mot de passe
                             </label>
-                            <input
+                            <PasswordInput
                                 id="signup-password"
-                                type="password"
-                                required
-                                autoComplete="new-password"
                                 value={password}
-                                onChange={(e) => setPassword(e.target.value)}
-                                className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring transition-shadow"
+                                onChange={setPassword}
+                                autoComplete="new-password"
                                 placeholder="Min. 6 caractères"
                             />
                         </div>
@@ -229,14 +260,11 @@ export function SignupPage() {
                             <label htmlFor="signup-confirm" className="block text-sm font-medium mb-1.5">
                                 Confirmer le mot de passe
                             </label>
-                            <input
+                            <PasswordInput
                                 id="signup-confirm"
-                                type="password"
-                                required
-                                autoComplete="new-password"
                                 value={confirmPassword}
-                                onChange={(e) => setConfirmPassword(e.target.value)}
-                                className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring transition-shadow"
+                                onChange={setConfirmPassword}
+                                autoComplete="new-password"
                                 placeholder="••••••••"
                             />
                         </div>
